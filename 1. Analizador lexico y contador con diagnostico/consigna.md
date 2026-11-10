@@ -11,4 +11,4 @@ K&R enseña a contar caracteres, lineas y palabras manejando estados (IN vs OUT)
     - Conteo discriminado de caracteres visibles vs espacios en blanco vs caracteres de control
 
 - **Por que es valioso:** Te enseña a procesar flujos de datos potencialmente infinitos (gigabytes de logs) consumiendo una cantidad de memoria virtual constante (O(1)) mediante $getchar()$
-- **Prueba de fuego en terminal:** Codigo: ./uniwc < /etc/passwd
+- **Prueba de fuego en terminal:** Codigo: ./uniwc < /etc/passwd (LINUX) - Get-Content C:\Windows\System32\drivers\etc\hosts -Raw | .\uniwc.exe (Windows)
