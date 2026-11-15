@@ -1,0 +1,7 @@
+	int x;        
+1	2	3	fin   
+		for (i = 0; i < 10; i++) {      
+El compilador debe plegar esta linea exactamente antes del limite sin romper palabras.
+http://servidor-planta-la-rioja.local/api/v1/telemetria/maquinaria/registro_crudo_sin_espacios
+   Linea con muchos espacios iniciales y finales    
+
