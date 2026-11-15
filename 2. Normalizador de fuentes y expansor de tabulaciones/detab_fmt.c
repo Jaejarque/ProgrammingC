@@ -26,17 +26,22 @@ int recien_plegada = 0;  /* 1 si la linea actual es continuacion de un corte */
 /* Imprime los primeros n caracteres de linea, sin los espacios del final. */
 void imprimir_sin_trailing(int n)
 {
+  int i;
+
   /* PUNTO 2: retrocedemos mientras el ultimo caracter sea un espacio */
   while (n > 0 && linea[n - 1] == ' ')
     --n;
 
-  for (int i = 0; i < n; i++)
+  for (i = 0; i < n; i++)
     putchar(linea[i]);
 }
 
 /* Agrega UN caracter (ya sin tabs) a la linea, plegando si hace falta. */
 void agregar(char ch)
 {
+  int i;     /* para el for que mueve el resto de la palabra */
+  int resto; /* cuantos caracteres quedan despues del ultimo espacio */
+
   /* Despues de un corte, los espacios al principio de la continuacion
      sobran (eran el "hueco" entre dos palabras). La indentacion real de
      una linea nueva NO se toca, porque ahi recien_plegada vale 0. */
@@ -64,8 +69,8 @@ void agregar(char ch)
 
       /* ...y lo de despues del espacio pasa al principio de la linea nueva.
          Esta parte no tiene espacios (ultimo_espacio era el ultimo). */
-      int resto = largo - (ultimo_espacio + 1);
-      for (int i = 0; i < resto; i++)
+      resto = largo - (ultimo_espacio + 1);
+      for (i = 0; i < resto; i++)
         linea[i] = linea[ultimo_espacio + 1 + i];
       largo = resto;
       ultimo_espacio = -1;
@@ -100,6 +105,8 @@ void terminar_linea(void)
 int main(void)
 {
   int c;
+  int i;
+  int espacios;
 
   while ((c = getchar()) != EOF)
   {
@@ -108,8 +115,9 @@ int main(void)
       /* PUNTO 1: espacios que faltan hasta la proxima parada.
          "largo" es la columna real, y largo % TABULACION es la posicion
          dentro del bloque (lo mismo que hacia el "contador" de antes). */
-      int espacios = TABULACION - (largo % TABULACION);
-      for (int i = 0; i < espacios; i++)
+      /* El operador % (resto de la division) se explica en K&R 2.5. */
+      espacios = TABULACION - (largo % TABULACION);
+      for (i = 0; i < espacios; i++)
         agregar(' ');
     }
     else if (c == '\n')

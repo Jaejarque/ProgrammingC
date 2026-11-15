@@ -8,6 +8,8 @@
  * codigo estamos, y cada estado tiene sus propias reglas para decidir
  * (1) si el caracter se imprime y (2) a que estado se pasa.
  *
+ * Solo usa herramientas del capitulo 1 de K&R (salvo fprintf, ver abajo).
+ *
  * Una sola variable de estado hace imposible estar "en un comentario y en
  * un string a la vez", que era el origen de varios errores.
  */
@@ -32,7 +34,9 @@ int llaves = 0;             /* cantidad de { abiertos sin cerrar */
 int errores = 0;            /* cuantos problemas encontramos */
 
 /* Lleva la cuenta de ( ) [ ] { }. Solo se llama desde codigo NORMAL,
-   asi que los que estan en comentarios o strings nunca se cuentan. */
+   asi que los que estan en comentarios o strings nunca se cuentan.
+   Si llega un cierre sin su apertura, lo informamos en el momento
+   (con la linea), porque al final ya no sabriamos donde estaba. */
 void contar_paridad(int c)
 {
   if (c == '(')
@@ -41,26 +45,35 @@ void contar_paridad(int c)
     ++corchetes;
   else if (c == '{')
     ++llaves;
-  else if (c == ')' || c == ']' || c == '}')
+  else if (c == ')')
   {
-    /* Elegimos el contador que corresponde a este cierre */
-    int *contador;
-    if (c == ')')
-      contador = &parentesis;
-    else if (c == ']')
-      contador = &corchetes;
-    else
-      contador = &llaves;
-
-    if (*contador == 0)
+    if (parentesis == 0)
     {
-      /* Un cierre sin su apertura: lo informamos en el momento,
-         con la linea, porque al final ya no sabriamos donde estaba. */
-      fprintf(stderr, "Error linea %d: '%c' sin apertura\n", linea, c);
+      fprintf(stderr, "Error linea %d: ')' sin apertura\n", linea);
       ++errores;
     }
     else
-      --*contador;
+      --parentesis;
+  }
+  else if (c == ']')
+  {
+    if (corchetes == 0)
+    {
+      fprintf(stderr, "Error linea %d: ']' sin apertura\n", linea);
+      ++errores;
+    }
+    else
+      --corchetes;
+  }
+  else if (c == '}')
+  {
+    if (llaves == 0)
+    {
+      fprintf(stderr, "Error linea %d: '}' sin apertura\n", linea);
+      ++errores;
+    }
+    else
+      --llaves;
   }
 }
 
@@ -138,14 +151,15 @@ int main(void)
     {
       if (c == '/')
         estado = NORMAL;         /* era "* /": se cerro el comentario */
-      else if (c == '*')
-        ;                        /* "**": el nuevo '*' tambien puede cerrar,
-                                    seguimos en este mismo estado */
-      else
+      else if (c != '*')
       {
+        /* Era un '*' suelto, seguimos adentro del comentario.
+           (Si llega otro '*', no hacemos nada: ese nuevo '*' tambien
+           puede ser el principio del cierre, asi que nos quedamos
+           en este mismo estado.) */
         if (c == '\n')
           putchar(c);
-        estado = COM_BLOQUE;     /* era un '*' suelto, seguimos adentro */
+        estado = COM_BLOQUE;
       }
     }
     else if (estado == STRING)
@@ -186,8 +200,11 @@ int main(void)
   if (estado == BARRA)
     putchar('/');
 
-  /* Los avisos van por stderr: asi aparecen en la consola pero NO quedan
-     escritos dentro de salida_limpia.c (eso romperia la compilacion). */
+  /* UNICA EXCEPCION AL CAPITULO 1: fprintf(stderr, ...) (capitulo 7).
+     Funciona igual que printf, pero escribe en la "salida de errores".
+     Asi los avisos aparecen en la consola pero NO quedan escritos dentro
+     de salida_limpia.c (si quedaran ahi, gcc no lo podria compilar).
+     Por ahora pensalo como "un printf para mensajes de error". */
   if (estado == COM_BLOQUE || estado == COM_BLOQUE_AST)
   {
     fprintf(stderr, "Error: comentario de bloque sin cerrar\n");
@@ -219,6 +236,5 @@ int main(void)
     ++errores;
   }
 
-  /* Devolver distinto de 0 le avisa al sistema que hubo errores */
-  return errores > 0;
+  return 0;
 }
