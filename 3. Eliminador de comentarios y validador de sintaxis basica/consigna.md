@@ -40,3 +40,14 @@ gcc -Wall -Wextra -pedantic -std=c89 salida_limpia.c -o test_ok.exe
 ./miniclean < test_dirty.c > salida_limpia.c
 cat salida_limpia.c
 gcc -Wall -Wextra -pedantic -std=c89 salida_limpia.c -o test_ok && ./test_ok
+
+
+
+
+
+
+gcc -Wall -Wextra -pedantic -std=c89 miniclean.c -o miniclean.exe
+
+Get-Content test_dirty.c -Raw | .\miniclean.exe | Set-Content -Encoding Ascii salida_limpia.c
+
+gcc -Wall -Wextra -pedantic -std=c89 salida_limpia.c -o test_ok.exe
